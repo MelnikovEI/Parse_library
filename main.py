@@ -1,3 +1,4 @@
+import argparse
 import os
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit, unquote
@@ -42,24 +43,29 @@ def download_image(url, folder='images/'):
 
 
 def parse_book_page(soup):
-    book_info = {}
-
     title_tag = soup.find('h1')
     title_text = title_tag.text.split(sep='::')
     genres = soup.find('span', class_='d_book').find_all('a')
     comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
 
-    book_info.update(
-        title=title_text[0].strip(),
-        author=title_text[1].strip(),
-        genres=[genre.text for genre in genres],
-        comments=[comment.text for comment in comments],
-    )
+    book_info = {
+        'title': title_text[0].strip(),
+        'author': title_text[1].strip(),
+        'genres': [genre.text for genre in genres],
+        'comments': [comment.text for comment in comments],
+    }
     return book_info
 
 
 def main():
-    for book_id in range(1, 11):
+    parser = argparse.ArgumentParser(description='Downloads books and cover images from tululu.org')
+    parser.add_argument('start_id', nargs='?', type=int, default=1,
+                        help='starting book_id to download, must be integer >= 1')
+    parser.add_argument('end_id', nargs='?', type=int, default=10,
+                        help='last book_id to download, must be integer >= start_id')
+    args = parser.parse_args()
+
+    for book_id in range(args.start_id, args.end_id+1):
         url = f"https://tululu.org/b{book_id}/"
         response = requests.get(url)
         response.raise_for_status()
@@ -68,26 +74,16 @@ def main():
         except requests.HTTPError:
             continue
         soup = BeautifulSoup(response.text, 'lxml')
-        title_tag = soup.find('h1')
-        title_text = title_tag.text.split(sep='::')
-        book_title = title_text[0].strip()
-        filename = f'{book_id}. {book_title}'
-        txt_url = f"https://tululu.org/txt.php?id={book_id}"
-        #download_txt(txt_url, filename)
+
+        book_title = parse_book_page(soup)['title']
+        filename = f'{book_id}.{book_title}'
+        book_text_url = f"https://tululu.org/txt.php?id={book_id}"
+        download_txt(book_text_url, filename)
 
         img_url = soup.find('div', class_='bookimage').find('img')['src']
         full_img_url = urljoin("https://tululu.org/", img_url)
-        #download_image(full_img_url)
+        download_image(full_img_url)
 
-        comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
-        #for comment in comments:
-        #    print(comment.text)
-
-        genres = soup.find('span', class_='d_book').find_all('a')
-        #for genre in genres:
-        #    print(genre.text)
-
-        print(parse_book_page(soup))
 
 if __name__ == '__main__':
     main()
