@@ -15,7 +15,7 @@ def check_for_redirect(response):
 def download_txt(url, filename, folder='books/'):
     """Функция для скачивания текстовых файлов.
     Args:
-        url (str): Cсылка на текст, который хочется скачать.
+        url (str): Ссылка на текст, который хочется скачать.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
     Returns:
@@ -24,6 +24,7 @@ def download_txt(url, filename, folder='books/'):
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
     response = requests.get(url)
     response.raise_for_status()
+    check_for_redirect(response)
     path = os.path.join(folder, f'{sanitize_filename(filename)}.txt')
     with open(path, 'wb') as file_to_save:
         file_to_save.write(response.content)
@@ -34,7 +35,7 @@ def download_image(url, folder='images/'):
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
     response = requests.get(url)
     response.raise_for_status()
-
+    check_for_redirect(response)
     filename = unquote(urlsplit(url).path.split('/')[-1])
     path = os.path.join(folder, sanitize_filename(filename))
     with open(path, 'wb') as file_to_save:
@@ -78,11 +79,15 @@ def main():
         book_title = parse_book_page(soup)['title']
         filename = f'{book_id}.{book_title}'
         book_text_url = f"https://tululu.org/txt.php?id={book_id}"
-        download_txt(book_text_url, filename)
 
         img_url = soup.find('div', class_='bookimage').find('img')['src']
         full_img_url = urljoin("https://tululu.org/", img_url)
-        download_image(full_img_url)
+
+        try:
+            download_txt(book_text_url, filename)
+            download_image(full_img_url)
+        except requests.HTTPError:
+            continue
 
 
 if __name__ == '__main__':
