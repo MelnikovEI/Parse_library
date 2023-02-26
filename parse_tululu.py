@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlsplit, unquote
 import requests
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
+from tqdm import tqdm
 
 
 def check_for_redirect(response):
@@ -66,7 +67,7 @@ def main():
                         help='last book_id to download, must be integer >= start_id')
     args = parser.parse_args()
 
-    for book_id in range(args.start_id, args.end_id+1):
+    for book_id in tqdm(range(args.start_id, args.end_id+1)):
         url = f"https://tululu.org/b{book_id}/"
         response = requests.get(url)
         response.raise_for_status()
