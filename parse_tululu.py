@@ -16,17 +16,19 @@ def check_for_redirect(response):
 
 
 @retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
-def download_txt(url, filename, folder='books/'):
+def download_txt(book_id, filename, folder='books/'):
     """Функция для скачивания текстовых файлов.
     Args:
-        url (str): Ссылка на текст, который хочется скачать.
+        book_id  (int): id книги для скачивания.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
     Returns:
         str: Путь до файла, куда сохранён текст.
     """
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
-    response = requests.get(url)
+    book_text_url = "https://tululu.org/txt.php"
+    params = {'id': book_id}
+    response = requests.get(book_text_url, params=params)
     response.raise_for_status()
     check_for_redirect(response)
     path = os.path.join(folder, f'{sanitize_filename(filename)}.txt')
@@ -92,14 +94,13 @@ def main():
 
         book_title = parse_book_page(soup)['title']
         filename = f'{book_id}.{book_title}'
-        book_text_url = f"https://tululu.org/txt.php?id={book_id}"
 
         img_url = soup.find('div', class_='bookimage').find('img')['src']
         full_img_url = urljoin("https://tululu.org/", img_url)
 
         try:
             try:
-                download_txt(book_text_url, filename)
+                download_txt(book_id, filename)
             except requests.HTTPError:
                 print('\n', f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
                 continue
