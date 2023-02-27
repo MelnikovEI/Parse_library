@@ -60,14 +60,12 @@ def parse_book_page(soup):
     title, author = title_tag.text.split(sep='::')
     genres = soup.find('span', class_='d_book').find_all('a')
     comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
-
-    book_info = {
+    return {
         'title': title.strip(),
         'author': author.strip(),
         'genres': [genre.text for genre in genres],
         'comments': [comment.text for comment in comments],
     }
-    return book_info
 
 
 def main():
