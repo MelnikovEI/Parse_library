@@ -97,7 +97,7 @@ def main():
         filename = f'{book_id}.{book_title}'
 
         img_url = parse_book_page(soup)['img_url']
-        full_img_url = urljoin("https://tululu.org/", img_url)
+        full_img_url = urljoin(url, img_url)
 
         try:
             try:
