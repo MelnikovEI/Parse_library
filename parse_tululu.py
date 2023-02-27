@@ -67,6 +67,7 @@ def parse_book_page(soup):
         'author': author.strip(),
         'genres': [genre.text for genre in genres],
         'comments': [comment.text for comment in comments],
+        'img_url': soup.find('div', class_='bookimage').find('img')['src'],
     }
 
 
@@ -95,7 +96,7 @@ def main():
         book_title = parse_book_page(soup)['title']
         filename = f'{book_id}.{book_title}'
 
-        img_url = soup.find('div', class_='bookimage').find('img')['src']
+        img_url = parse_book_page(soup)['img_url']
         full_img_url = urljoin("https://tululu.org/", img_url)
 
         try:
