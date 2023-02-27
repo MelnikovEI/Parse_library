@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit, unquote
 import requests
@@ -74,6 +75,7 @@ def main():
         try:
             check_for_redirect(response)
         except requests.HTTPError:
+            print('\n', f'page for book number {book_id} doesn\'t exist', file=sys.stderr)
             continue
         soup = BeautifulSoup(response.text, 'lxml')
 
@@ -86,9 +88,13 @@ def main():
 
         try:
             download_txt(book_text_url, filename)
+        except requests.HTTPError:
+            print('\n', f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
+            continue
+        try:
             download_image(full_img_url)
         except requests.HTTPError:
-            continue
+            print('\n', f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
 
 
 if __name__ == '__main__':
