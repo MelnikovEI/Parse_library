@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 from tqdm import tqdm
+from retry import retry
 
 
 def check_for_redirect(response):
@@ -14,6 +15,7 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
+@retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
 def download_txt(url, filename, folder='books/'):
     """Функция для скачивания текстовых файлов.
     Args:
@@ -33,6 +35,7 @@ def download_txt(url, filename, folder='books/'):
     return path
 
 
+@retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
 def download_image(url, folder='images/'):
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
     response = requests.get(url)
@@ -43,6 +46,13 @@ def download_image(url, folder='images/'):
     with open(path, 'wb') as file_to_save:
         file_to_save.write(response.content)
     return path
+
+
+@retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
+def get_response(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response
 
 
 def parse_book_page(soup):
@@ -70,13 +80,16 @@ def main():
 
     for book_id in tqdm(range(args.start_id, args.end_id+1)):
         url = f"https://tululu.org/b{book_id}/"
-        response = requests.get(url)
-        response.raise_for_status()
         try:
+            response = get_response(url)
             check_for_redirect(response)
         except requests.HTTPError:
             print('\n', f'page for book number {book_id} doesn\'t exist', file=sys.stderr)
             continue
+        except (requests.ConnectionError, requests.Timeout) as err:
+            print('\n', err, file=sys.stderr)
+            continue
+
         soup = BeautifulSoup(response.text, 'lxml')
 
         book_title = parse_book_page(soup)['title']
@@ -87,14 +100,17 @@ def main():
         full_img_url = urljoin("https://tululu.org/", img_url)
 
         try:
-            download_txt(book_text_url, filename)
-        except requests.HTTPError:
-            print('\n', f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
-            continue
-        try:
-            download_image(full_img_url)
-        except requests.HTTPError:
-            print('\n', f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
+            try:
+                download_txt(book_text_url, filename)
+            except requests.HTTPError:
+                print('\n', f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
+                continue
+            try:
+                download_image(full_img_url)
+            except requests.HTTPError:
+                print('\n', f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
+        except (requests.ConnectionError, requests.Timeout) as err:
+            print('\n', err, file=sys.stderr)
 
 
 if __name__ == '__main__':
