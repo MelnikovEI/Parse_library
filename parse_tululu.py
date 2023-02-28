@@ -99,15 +99,17 @@ def main():
         full_img_url = urljoin(url, img_url)
 
         try:
-            try:
-                download_txt(book_id, filename)
-            except requests.HTTPError:
-                print('\n', f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
-                continue
-            try:
-                download_image(full_img_url)
-            except requests.HTTPError:
-                print('\n', f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
+            download_txt(book_id, filename)
+        except requests.HTTPError:
+            print('\n', f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
+            continue
+        except (requests.ConnectionError, requests.Timeout) as err:
+            print('\n', err, file=sys.stderr)
+
+        try:
+            download_image(full_img_url)
+        except requests.HTTPError:
+            print('\n', f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
         except (requests.ConnectionError, requests.Timeout) as err:
             print('\n', err, file=sys.stderr)
 
