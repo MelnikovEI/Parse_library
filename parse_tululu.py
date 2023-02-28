@@ -15,7 +15,6 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-@retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
 def download_txt(book_id, filename, folder='books/'):
     """Функция для скачивания текстовых файлов.
     Args:
@@ -28,21 +27,16 @@ def download_txt(book_id, filename, folder='books/'):
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
     book_text_url = "https://tululu.org/txt.php"
     params = {'id': book_id}
-    response = requests.get(book_text_url, params=params)
-    response.raise_for_status()
-    check_for_redirect(response)
+    response = get_response(book_text_url, params=params)
     path = os.path.join(folder, f'{sanitize_filename(filename)}.txt')
     with open(path, 'wb') as file_to_save:
         file_to_save.write(response.content)
     return path
 
 
-@retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
 def download_image(url, folder='images/'):
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
-    response = requests.get(url)
-    response.raise_for_status()
-    check_for_redirect(response)
+    response = get_response(url)
     filename = unquote(urlsplit(url).path.split('/')[-1])
     path = os.path.join(folder, sanitize_filename(filename))
     with open(path, 'wb') as file_to_save:
@@ -51,9 +45,10 @@ def download_image(url, folder='images/'):
 
 
 @retry(requests.ConnectionError, delay=1, backoff=2, tries=5)
-def get_response(url):
-    response = requests.get(url)
+def get_response(url, params={}):
+    response = requests.get(url, params=params)
     response.raise_for_status()
+    check_for_redirect(response)
     return response
 
 
@@ -83,7 +78,6 @@ def main():
         url = f"https://tululu.org/b{book_id}/"
         try:
             response = get_response(url)
-            check_for_redirect(response)
         except requests.HTTPError:
             print('\n', f'page for book number {book_id} doesn\'t exist', file=sys.stderr)
             continue
