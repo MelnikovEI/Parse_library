@@ -92,11 +92,10 @@ def main():
             continue
 
         soup = BeautifulSoup(response.text, 'lxml')
-
-        book_title = parse_book_page(soup)['title']
+        book_details = parse_book_page(soup)
+        book_title = book_details['title']
         filename = f'{book_id}.{book_title}'
-
-        img_url = parse_book_page(soup)['img_url']
+        img_url = book_details['img_url']
         full_img_url = urljoin(url, img_url)
 
         try:
