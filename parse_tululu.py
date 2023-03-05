@@ -53,14 +53,14 @@ def get_response(url, params={}):
 
 
 def parse_book_page(soup):
-    title_tag = soup.find('h1')
+    title_tag = soup.select_one('h1')
     title, author = title_tag.text.split(sep='::')
-    genres = soup.find('span', class_='d_book').find_all('a')
-    comments = soup.find('td', class_='ow_px_td').find_all('span', class_='black')
+    genres = soup.select('span.d_book a')
+    comments = soup.select('.texts .black')
     return {
         'title': title.strip(),
         'author': author.strip(),
-        'img_src': soup.find('div', class_='bookimage').find('img')['src'],
+        'img_src': soup.select_one('.bookimage img')['src'],
         'comments': [comment.text for comment in comments],
         'genres': [genre.text for genre in genres],
     }
