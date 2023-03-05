@@ -60,9 +60,9 @@ def parse_book_page(soup):
     return {
         'title': title.strip(),
         'author': author.strip(),
-        'genres': [genre.text for genre in genres],
+        'img_src': soup.find('div', class_='bookimage').find('img')['src'],
         'comments': [comment.text for comment in comments],
-        'img_url': soup.find('div', class_='bookimage').find('img')['src'],
+        'genres': [genre.text for genre in genres],
     }
 
 
@@ -89,7 +89,7 @@ def main():
         book_details = parse_book_page(soup)
         book_title = book_details['title']
         filename = f'{book_id}.{book_title}'
-        img_url = book_details['img_url']
+        img_url = book_details['img_src']
         full_img_url = urljoin(url, img_url)
 
         try:
