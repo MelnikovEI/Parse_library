@@ -25,9 +25,9 @@ def main():
     args = parser.parse_args()
     Path(Path.cwd() / args.dest_folder).mkdir(parents=True, exist_ok=True)
     books_details = []
-    for i in tqdm(range(args.start_page, args.end_page)):
+    for page_number in tqdm(range(args.start_page, args.end_page)):
         print()
-        url = f"https://tululu.org/l55/{i}/"
+        url = f"https://tululu.org/l55/{page_number}/"
         try:
             response = get_response(url)
         except requests.HTTPError:
@@ -84,7 +84,7 @@ def main():
     json_folder = args.json_path if args.json_path else args.dest_folder
     Path(Path.cwd() / json_folder).mkdir(parents=True, exist_ok=True)
     books_details_file = os.path.join(json_folder, "books.json")
-    with open(books_details_file, "a") as books_file:
+    with open(books_details_file, "w") as books_file:
         books_file.write(books_details_json)
 
 
