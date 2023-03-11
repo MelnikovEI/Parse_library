@@ -15,7 +15,7 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def download_txt(book_id, filename, folder='books/'):
+def download_txt(book_id, filename, folder='books'):
     """Функция для скачивания текстовых файлов.
     Args:
         book_id  (int): id книги для скачивания.
@@ -34,7 +34,7 @@ def download_txt(book_id, filename, folder='books/'):
     return path
 
 
-def download_image(url, folder='images/'):
+def download_image(url, folder='images'):
     Path(Path.cwd() / folder).mkdir(parents=True, exist_ok=True)
     response = get_response(url)
     filename = unquote(urlsplit(url).path.split('/')[-1])

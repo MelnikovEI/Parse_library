@@ -1,6 +1,8 @@
 import argparse
 import json
+import os
 import sys
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -15,8 +17,14 @@ def main():
                         help='starting book_id to download, must be integer >= 1')
     parser.add_argument('--end_page', nargs='?', type=int, default=702,
                         help='download book_id to --end_page, excluded, must be integer >= start_id')
-    args = parser.parse_args()
+    parser.add_argument('--dest_folder', nargs='?', default='books', help='folder to download books to')
+    parser.add_argument('--skip_imgs', action='store_true', help='skip downloading images')
+    parser.add_argument('--skip_txt', action='store_true', help='skip downloading book texts')
+    parser.add_argument('--json_path', nargs='?', help='folder to download "books details json" to')
 
+    args = parser.parse_args()
+    Path(Path.cwd() / args.dest_folder).mkdir(parents=True, exist_ok=True)
+    books_details = []
     for i in tqdm(range(args.start_page, args.end_page)):
         print()
         url = f"https://tululu.org/l55/{i}/"
@@ -46,31 +54,38 @@ def main():
 
             soup = BeautifulSoup(response.text, 'lxml')
             book_details = parse_book_page(soup)
-            book_title = book_details['title']
-            filename = f'{book_id}.{book_title}'
-            img_url = book_details['img_src']
-            full_img_url = urljoin(url, img_url)
-            
-            try:
-                book_path = download_txt(book_id, filename)
-            except requests.HTTPError:
-                print(f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
-                continue
-            except (requests.ConnectionError, requests.Timeout) as err:
-                print(err, file=sys.stderr)
-                continue
-            book_details.update({'book_path': book_path})
-            book_details_json = json.dumps(book_details, ensure_ascii=False)
-            with open("books.json", "w") as books_file:
-                books_file.write(book_details_json)
-            print(f'{book_path}     downloaded')
 
-            try:
-                download_image(full_img_url)
-            except requests.HTTPError:
-                print(f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
-            except (requests.ConnectionError, requests.Timeout) as err:
-                print(err, file=sys.stderr)
+            if not args.skip_txt:
+                book_title = book_details['title']
+                filename = f'{book_id}.{book_title}'
+                try:
+                    book_path = download_txt(book_id, filename, folder=args.dest_folder)
+                except requests.HTTPError:
+                    print(f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
+                    continue
+                except (requests.ConnectionError, requests.Timeout) as err:
+                    print(err, file=sys.stderr)
+                    continue
+                book_details.update({'book_path': book_path})
+                books_details.append(book_details)
+                print(f'{book_path}     downloaded')
+
+            if not args.skip_imgs:
+                img_url = book_details['img_src']
+                full_img_url = urljoin(url, img_url)
+                try:
+                    download_image(full_img_url, folder=args.dest_folder)
+                except requests.HTTPError:
+                    print(f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
+                except (requests.ConnectionError, requests.Timeout) as err:
+                    print(err, file=sys.stderr)
+
+    books_details_json = json.dumps(books_details, ensure_ascii=False)
+    json_folder = args.json_path if args.json_path else args.dest_folder
+    Path(Path.cwd() / json_folder).mkdir(parents=True, exist_ok=True)
+    books_details_file = os.path.join(json_folder, "books.json")
+    with open(books_details_file, "a") as books_file:
+        books_file.write(books_details_json)
 
 
 if __name__ == '__main__':
