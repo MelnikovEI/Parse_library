@@ -66,7 +66,7 @@ def main():
                 except (requests.ConnectionError, requests.Timeout) as err:
                     print(err, file=sys.stderr)
                     continue
-                book_details.update({'book_path': book_path})
+                book_details['book_path'] = book_path
                 books_details.append(book_details)
                 print(f'{book_path}     downloaded')
 
