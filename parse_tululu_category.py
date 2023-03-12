@@ -80,12 +80,11 @@ def main():
                 except (requests.ConnectionError, requests.Timeout) as err:
                     print(err, file=sys.stderr)
 
-    books_details_json = json.dumps(books_details, ensure_ascii=False)
     json_folder = args.json_path if args.json_path else args.dest_folder
     Path(Path.cwd() / json_folder).mkdir(parents=True, exist_ok=True)
     books_details_file = os.path.join(json_folder, "books.json")
     with open(books_details_file, "w") as books_file:
-        books_file.write(books_details_json)
+        json.dump(books_details, books_file, ensure_ascii=False)
 
 
 if __name__ == '__main__':
