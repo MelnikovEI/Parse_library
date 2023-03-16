@@ -31,7 +31,7 @@ def download_txt(book_id, filename, folder='books'):
     path = os.path.join(folder, f'{sanitize_filename(filename)}.txt')
     with open(path, 'wb') as file_to_save:
         file_to_save.write(response.content)
-    return path
+    return path.replace("\\", "/")
 
 
 def download_image(url, folder='images'):
@@ -41,7 +41,7 @@ def download_image(url, folder='images'):
     path = os.path.join(folder, sanitize_filename(filename))
     with open(path, 'wb') as file_to_save:
         file_to_save.write(response.content)
-    return path
+    return path.replace("\\", "/")
 
 
 @retry(requests.ConnectionError, delay=1, backoff=2, tries=5)

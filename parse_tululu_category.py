@@ -67,24 +67,26 @@ def main():
                     print(err, file=sys.stderr)
                     continue
                 book_details['book_path'] = book_path
-                books_details.append(book_details)
-                print(f'{book_path}     downloaded')
 
             if not args.skip_imgs:
                 img_url = book_details['img_src']
                 full_img_url = urljoin(url, img_url)
                 try:
-                    download_image(full_img_url, folder=args.dest_folder)
+                    img_path = download_image(full_img_url, folder=args.dest_folder)
                 except requests.HTTPError:
                     print(f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
                 except (requests.ConnectionError, requests.Timeout) as err:
                     print(err, file=sys.stderr)
+                book_details['img_path'] = img_path
+                books_details.append(book_details)
+                print(f'{book_path}     downloaded')
 
     json_folder = args.json_path if args.json_path else args.dest_folder
     Path(Path.cwd() / json_folder).mkdir(parents=True, exist_ok=True)
     books_details_file = os.path.join(json_folder, "books.json")
+    books_details_json = json.dumps(books_details, ensure_ascii=False)
     with open(books_details_file, "w") as books_file:
-        json.dump(books_details, books_file, ensure_ascii=False)
+        books_file.write(books_details_json)
 
 
 if __name__ == '__main__':
