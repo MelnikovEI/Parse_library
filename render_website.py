@@ -2,8 +2,6 @@ import json
 import math
 import os
 from pathlib import Path
-
-from livereload import Server
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from more_itertools import chunked
 
@@ -34,6 +32,3 @@ def rebuild():
 
 
 rebuild()
-#server = Server()
-#server.watch('template.html', rebuild)
-#server.serve(root='.')
