@@ -1,3 +1,4 @@
+import argparse
 import json
 import math
 import os
@@ -14,7 +15,11 @@ def rebuild():
         autoescape=select_autoescape(['html', 'xml'])
     )
     template = env.get_template('template.html')
-    with open(os.path.join('media', "books.json"), "r") as books_file:
+    parser = argparse.ArgumentParser(description='Creates html files with book cards from "books.json"')
+    parser.add_argument('--json_path', nargs='?', default='media', help='folder, containing file "books.json"')
+    args = parser.parse_args()
+
+    with open(os.path.join(args.json_path, "books.json"), "r") as books_file:
         books_json = books_file.read()
     books = json.loads(books_json)
     Path(Path.cwd() / 'pages').mkdir(parents=True, exist_ok=True)
