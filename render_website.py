@@ -32,7 +32,6 @@ def rebuild():
         )
         with open(os.path.join('pages', f'index{page_num}.html'), 'w', encoding="utf8") as file:
             file.write(rendered_page)
-    print("Site rebuilt")
 
 
 rebuild()
