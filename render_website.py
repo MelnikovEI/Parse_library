@@ -20,8 +20,8 @@ def rebuild():
     args = parser.parse_args()
 
     with open(os.path.join(args.json_path, "books.json"), "r") as books_file:
-        books_json = books_file.read()
-    books = json.loads(books_json)
+        books = json.load(books_file)
+    print(books)
     Path(Path.cwd() / 'pages').mkdir(parents=True, exist_ok=True)
     num_pages = math.ceil(len(books) / BOOK_CARDS_PER_PAGE)
     for page_num, books_part in enumerate(chunked(books, BOOK_CARDS_PER_PAGE), 1):
