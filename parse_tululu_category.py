@@ -17,10 +17,10 @@ def main():
                         help='starting book_id to download, must be integer >= 1')
     parser.add_argument('--end_page', nargs='?', type=int, default=702,
                         help='download book_id to --end_page, excluded, must be integer >= start_id')
-    parser.add_argument('--dest_folder', nargs='?', default='books', help='folder to download books to')
+    parser.add_argument('--dest_folder', nargs='?', default='media', help='folder to download books to')
     parser.add_argument('--skip_imgs', action='store_true', help='skip downloading images')
     parser.add_argument('--skip_txt', action='store_true', help='skip downloading book texts')
-    parser.add_argument('--json_path', nargs='?', help='folder to download "books details json" to')
+    parser.add_argument('--json_path', nargs='?', default='media', help='folder to download "books details json" to')
 
     args = parser.parse_args()
     Path(Path.cwd() / args.dest_folder).mkdir(parents=True, exist_ok=True)
@@ -59,7 +59,7 @@ def main():
                 book_title = book_details['title']
                 filename = f'{book_id}.{book_title}'
                 try:
-                    book_path = download_txt(book_id, filename, folder=args.dest_folder)
+                    book_path = download_txt(book_id, filename, folder=os.path.join(args.dest_folder, 'books'))
                 except requests.HTTPError:
                     print(f'url for text of book number {book_id} wasn\'t found ', file=sys.stderr)
                     continue
@@ -72,7 +72,7 @@ def main():
                 img_url = book_details['img_src']
                 full_img_url = urljoin(url, img_url)
                 try:
-                    img_path = download_image(full_img_url, folder=args.dest_folder)
+                    img_path = download_image(full_img_url, folder=os.path.join(args.dest_folder, 'images'))
                 except requests.HTTPError:
                     print(f'url for cover image of book number {book_id} wasn\'t found ', file=sys.stderr)
                 except (requests.ConnectionError, requests.Timeout) as err:
@@ -81,7 +81,7 @@ def main():
                 books_details.append(book_details)
                 print(f'{book_path}     downloaded')
 
-    json_folder = args.json_path if args.json_path else args.dest_folder
+    json_folder = args.json_path
     Path(Path.cwd() / json_folder).mkdir(parents=True, exist_ok=True)
     books_details_file = os.path.join(json_folder, "books.json")
     books_details_json = json.dumps(books_details, ensure_ascii=False)

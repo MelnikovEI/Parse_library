@@ -14,7 +14,7 @@ def rebuild():
         autoescape=select_autoescape(['html', 'xml'])
     )
     template = env.get_template('template.html')
-    with open(os.path.join('books', "books.json"), "r") as books_file:
+    with open(os.path.join('media', "books.json"), "r") as books_file:
         books_json = books_file.read()
     books = json.loads(books_json)
     Path(Path.cwd() / 'pages').mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,6 @@ def rebuild():
         )
         with open(os.path.join('pages', f'index{page_num}.html'), 'w', encoding="utf8") as file:
             file.write(rendered_page)
-    print(num_pages)
     print("Site rebuilt")
 
 
