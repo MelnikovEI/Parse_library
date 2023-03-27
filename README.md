@@ -76,7 +76,7 @@ python render_website.py
 ```sh
 python3 parse_tululu_category.py --json_path 'Папка для json' 
 ```
-
+Скрипт будет работать бесконечно, отслеживая изменения в `template.html`
 ### Цель проекта
 Код написан в образовательных целях на онлайн-курсе для веб-разработчиков [dvmn.org](https://dvmn.org/).
 

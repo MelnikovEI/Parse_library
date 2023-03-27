@@ -4,6 +4,7 @@ import math
 import os
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from livereload import Server
 from more_itertools import chunked
 
 BOOK_CARDS_PER_PAGE = 20
@@ -35,3 +36,6 @@ def rebuild():
 
 
 rebuild()
+server = Server()
+server.watch('template.html', rebuild)
+server.serve(root='.')
