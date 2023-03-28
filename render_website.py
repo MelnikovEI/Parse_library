@@ -25,9 +25,9 @@ def rebuild():
 
     Path(Path.cwd() / 'pages').mkdir(parents=True, exist_ok=True)
     num_pages = math.ceil(len(book_descriptions) / BOOK_CARDS_PER_PAGE)
-    for page_num, books_part in enumerate(chunked(book_descriptions, BOOK_CARDS_PER_PAGE), 1):
+    for page_num, book_descriptions_for_page in enumerate(chunked(book_descriptions, BOOK_CARDS_PER_PAGE), 1):
         rendered_page = template.render(
-            books=books_part,
+            book_descriptions_for_page=book_descriptions_for_page,
             current_page=page_num,
             num_pages=num_pages,
         )
