@@ -35,7 +35,12 @@ def rebuild():
             file.write(rendered_page)
 
 
-rebuild()
-server = Server()
-server.watch('template.html', rebuild)
-server.serve(root='.')
+def main():
+    rebuild()
+    server = Server()
+    server.watch('template.html', rebuild)
+    server.serve(root='.')
+
+
+if __name__ == '__main__':
+    main()
