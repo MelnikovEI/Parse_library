@@ -21,11 +21,11 @@ def rebuild():
     args = parser.parse_args()
 
     with open(args.json_path, "r") as books_file:
-        books_description = json.load(books_file)
+        book_descriptions = json.load(books_file)
 
     Path(Path.cwd() / 'pages').mkdir(parents=True, exist_ok=True)
-    num_pages = math.ceil(len(books_description) / BOOK_CARDS_PER_PAGE)
-    for page_num, books_part in enumerate(chunked(books_description, BOOK_CARDS_PER_PAGE), 1):
+    num_pages = math.ceil(len(book_descriptions) / BOOK_CARDS_PER_PAGE)
+    for page_num, books_part in enumerate(chunked(book_descriptions, BOOK_CARDS_PER_PAGE), 1):
         rendered_page = template.render(
             books=books_part,
             current_page=page_num,
