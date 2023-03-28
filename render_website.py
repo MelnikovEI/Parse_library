@@ -17,10 +17,10 @@ def rebuild():
     )
     template = env.get_template('template.html')
     parser = argparse.ArgumentParser(description='Creates html files with book cards from "books.json"')
-    parser.add_argument('--json_path', nargs='?', default='media', help='folder, containing file "books.json"')
+    parser.add_argument('--json_path', nargs='?', default='media/books.json', help='folder, containing file "books.json"')
     args = parser.parse_args()
 
-    with open(os.path.join(args.json_path, "books.json"), "r") as books_file:
+    with open(args.json_path, "r") as books_file:
         books_description = json.load(books_file)
 
     Path(Path.cwd() / 'pages').mkdir(parents=True, exist_ok=True)

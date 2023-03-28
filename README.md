@@ -47,6 +47,8 @@ python3 parse_tululu_category.py --start_page 700 --end_page 701
 ```sh
 python3 parse_tululu_category.py --dest_folder 'Моя папка' --json_path 'Папка для json' 
 ```
+json_path - папка для файла "books.json", содержащего данные о книгах.
+
 Вы можете выключить загрузку книг или обложек, например:
 ```sh
 python3 parse_tululu_category.py --skip_txt 
@@ -64,7 +66,7 @@ python3 parse_tululu_category.py --skip_imgs
 - ...
 ```
 _Книга №2 не была скачана, поскольку она отсутствует на сайте._
-
+ 
 ## Как использовать render_website.py
 После скачивания книг в папку "media", запустите скрипт командой
 ```sh
@@ -73,9 +75,9 @@ python render_website.py
 В результате в папке "pages" будут созданы файлы index[i].html, содержащие карточки книг и ссылки на текст.
 Для открытия локальной версии библиотеки можно открыть файл: `pages/index1.html`
 
-Вы можете указать папку, отличную от "media", содержащую файл с карточками книг "books.json" например:
+Вы можете указать путь к файлу с карточками книг "books.json", отличный от "media/books.json" например:
 ```sh
-python3 parse_tululu_category.py --json_path 'Папка для json' 
+python render_website.py --json_path books.json 
 ```
 Скрипт будет работать бесконечно, отслеживая изменения в `template.html`
 ### Цель проекта
